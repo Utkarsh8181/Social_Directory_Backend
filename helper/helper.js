@@ -7,7 +7,7 @@ class Helper {
             phoneNo: data.phoneNo,
             email: data.email
         };
-        return jwt.sign({ dataForToken }, process.env.JWT_SECRET, { expiresIn: '24H' });
+        return jwt.sign({ dataForToken }, process.env.JWT_SECRET, { expiresIn: '249H' });
     };
 }
 
