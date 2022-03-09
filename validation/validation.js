@@ -24,6 +24,20 @@ class Validation {
             .pattern(new RegExp('(?=^.{8,}$)((?=.*\\d)|(?=.*\\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$'))
             .required()
     })
+
+    profileValidation = Joi.object({
+        name: Joi.string()
+            .required(),
+
+        dob: Joi.string()
+            .required(),
+
+        interests: Joi.array()
+            .required(),
+
+        location: Joi.string()
+            .required()
+    })
 }
 
 export default new Validation();

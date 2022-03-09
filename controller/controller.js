@@ -1,8 +1,9 @@
-import httpStatusCode from "httpStatusCode-status";
+import httpStatusCode from "http-status";
 import bcrypt from "bcryptjs";
 import helper from "../helper/helper.js";
 import { logger } from "../logger/logger.js";
 import User from '../model/userSchema.js'
+import Profile from "../model/profileSchema.js";
 import validation from '../validation/validation.js'
 
 class UserController {
@@ -25,7 +26,7 @@ class UserController {
             }
             const userExist = await User.findOne({ email: email });
             if (userExist) {
-                return res.status(httpStatusCode.UNPROCESSABLE_ENTITY).json({ error: "User already Exist" })
+                return res.status(httpStatusCode.CONFLICT).json({ error: "User already Exist" })
             }
             else {
                 const user = new User({ email, phoneNo, password })
@@ -42,6 +43,7 @@ class UserController {
             logger.error(error);
         }
     }
+
 
     login = async (req, res) => {
         const { email, password } = req.body;
@@ -78,5 +80,40 @@ class UserController {
             console.log(error);
         }
     }
+
+
+    profile = async (req, res) => {
+        const { name, dob, location, interests } = req.body;
+        const userId = req.user.dataForToken.id;
+
+        if (!name || !dob || !location || !interests) {
+            res.status(httpStatusCode.UNPROCESSABLE_ENTITY).json({ error: "Please fill all the fields" })
+        }
+        try {
+            const profileValidation = validation.profileValidation.validate(req.body);
+            if (profileValidation.error) {
+                logger.error('Wrong Input Validations');
+                return res.status(422).send({
+                    success: false,
+                    error: 'Wrong Input Validations',
+                    data: profileValidation,
+                });
+            }
+            const profileExist = await Profile.findOne({ userId: userId });
+            if (profileExist) {
+                return res.status(httpStatusCode.CONFLICT).json({ error: "Profile already exist" })
+            }
+            else {
+                const profile = new Profile({ name, dob, location, interests, userId })
+                const data = await profile.save();
+                if (data) {
+                    return res.status(httpStatusCode.CREATED).json({ message: "Profile created successfully" })
+                }
+            }
+        } catch (error) {
+            logger.error(error);
+        }
+    }
 }
+
 export default new UserController;
